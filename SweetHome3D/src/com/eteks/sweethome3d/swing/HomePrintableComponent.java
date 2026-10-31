@@ -37,7 +37,9 @@ import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.security.AccessControlException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.HashSet;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -279,7 +281,16 @@ public class HomePrintableComponent extends JComponent implements Printable {
           homeName = "";
         }
         String levelName = "";
-        if (this.home.getSelectedLevel() != null) {
+        List<Level> viewableLevels = new ArrayList<Level>();
+        for (Level level : this.home.getLevels()) {
+          if (level.isViewable()) {
+            viewableLevels.add(level);
+          }
+        }
+        int planPageIndex = page - this.furniturePageCount;
+        if (!viewableLevels.isEmpty() && planPageIndex >= 0 && planPageIndex < viewableLevels.size()) {
+          levelName = viewableLevels.get(planPageIndex).getName();
+        } else if (this.home.getSelectedLevel() != null) {
           levelName = this.home.getSelectedLevel().getName();
         }
         String homePresentationName = this.controller.getContentManager().getPresentationName(
@@ -351,14 +362,12 @@ public class HomePrintableComponent extends JComponent implements Printable {
           && (homePrint == null
               || homePrint.isPlanPrinted()
               || homePrint.isView3DPrinted())) {
-        final Level selectedLevel = home.getSelectedLevel();
         furnitureTable = (FurnitureTable)furnitureView;
         furnitureFilter = furnitureTable.getFurnitureFilter();
         furnitureTable.setFurnitureFilter(new FurnitureTable.FurnitureFilter() {
             public boolean include(Home home, HomePieceOfFurniture piece) {
-              // Print only furniture at selected level when the plan or the 3D view is printed
+              // Print furniture on every viewable level
               return (furnitureFilter == null || furnitureFilter.include(home, piece))
-                  && piece.isAtLevel(selectedLevel)
                   && (piece.getLevel() == null || piece.getLevel().isViewable());
             }
           });
