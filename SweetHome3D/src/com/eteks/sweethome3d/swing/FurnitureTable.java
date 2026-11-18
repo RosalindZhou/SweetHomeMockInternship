@@ -829,15 +829,15 @@ public class FurnitureTable extends JTable implements View, Printable {
     if (EventQueue.isDispatchThread()) {
       TableColumnModel oldColumnModel = getColumnModel();
       Color oldGridColor = getGridColor();
-      setColumnModel(printableColumnModel);   
-      if (OperatingSystem.isWindows()) {
-        // Add 3 pixels to columns to get a correct rendering
-        updateTableColumnsWidth(3);
-      } else {
-        updateTableColumnsWidth(0);
-      }
-      setGridColor(gridColor);
       try {
+        setColumnModel(printableColumnModel);
+        if (OperatingSystem.isWindows()) {
+          // Add 3 pixels to columns to get correct rendering.
+          updateTableColumnsWidth(3);
+        } else {
+          updateTableColumnsWidth(0);
+        }
+        setGridColor(gridColor);
         Printable printable = getPrintable(PrintMode.FIT_WIDTH, null, null);
         return printable.print(g, pageFormat, pageIndex);
       } finally {
